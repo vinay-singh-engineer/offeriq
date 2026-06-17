@@ -1,8 +1,9 @@
-# OfferIQ — Job Offer Intelligence Platform
+# OfferIQ — Job Offer Intelligence Platform 🚀
 
 ![CI](https://github.com/vinay-singh-engineer/offeriq/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-green)
+![Docker](https://img.shields.io/badge/docker-compose-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **OfferIQ** evaluates job offers the way no existing tool does — holistically.
@@ -18,7 +19,7 @@ negotiation email with your specific numbers.
 ## Features
 
 | Feature | What it does |
-|---|---|
+|:---|:---|
 | **Market Benchmark** | BLS Occupational Employment Statistics — p25/p50/p75 for your role + location |
 | **Equity Normalization** | RSU vs. options, cliff-aware vesting math, underwater detection |
 | **COL Adjustment** | Teleport API + COL index — normalizes salary to national purchasing power |
@@ -66,21 +67,41 @@ git clone https://github.com/vinay-singh-engineer/offeriq.git
 cd offeriq
 
 cp .env.example .env
-# Edit .env — add your ANTHROPIC_API_KEY (required for /api/negotiate only)
+```
 
+Edit `.env` and fill in your values:
+
+```env
+APP_PORT=8000
+ANTHROPIC_API_KEY=your_anthropic_api_key_here   # required for /api/negotiate
+
+# Optional: uncomment all three to use a custom mTLS proxy instead of the Anthropic SDK
+# FLOODGATE_CERT=/path/to/chain.pem
+# FLOODGATE_KEY=/path/to/private.pem
+# FLOODGATE_URL=https://your-claude-proxy/api/anthropic/v1/messages
+```
+
+```bash
 docker compose up
 ```
 
 ### Local development
 
 ```bash
+git clone https://github.com/vinay-singh-engineer/offeriq.git
+cd offeriq
+
 python3.9 -m venv .venv --system-site-packages
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env  # add ANTHROPIC_API_KEY
+cp .env.example .env
+```
 
-uvicorn app.main:app --reload
+Edit `.env` and fill in your values (same as above), then:
+
+```bash
+python3.9 -m uvicorn app.main:app --reload --port 8000
 ```
 
 ---
@@ -90,16 +111,16 @@ uvicorn app.main:app --reload
 Once the server is running, open your browser:
 
 | URL | What you get |
-|---|---|
+|:---|:---|
 | `http://localhost:8000` | Web UI — form-based offer evaluation |
 | `http://localhost:8000/docs` | Interactive API docs (Swagger) |
-| `http://localhost:8000/demo/analyze` | Pre-built Stripe L5 analysis — no input needed |
-| `http://localhost:8000/demo/compare` | Pre-built Stripe vs Google comparison |
+| `http://localhost:8000/demo/analyze` | Pre-built Apple ICT5 SRE analysis — no input needed |
+| `http://localhost:8000/demo/compare` | Pre-built Apple vs Google SRE comparison |
 
 ### Analyze an offer
 
 1. Go to `http://localhost:8000`
-2. Fill in the **Offer Details** form — or click **Load Demo** to pre-fill a Stripe L5 Seattle offer
+2. Fill in the **Offer Details** form — or click **Load Demo** to pre-fill an Apple ICT5 SRE offer
 3. Click **Analyze Offer →**
 4. Results appear below: overall score, dimension breakdown, market benchmark, company health
 
@@ -136,27 +157,27 @@ curl -X POST http://localhost:8000/api/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "offer": {
-      "company_name": "Stripe",
-      "role": "Senior Software Engineer",
-      "level": "L5",
-      "location": "Seattle, WA",
-      "base_salary": 165000,
-      "signing_bonus": 25000,
-      "annual_bonus_target_pct": 12,
+      "company_name": "Apple",
+      "role": "Senior Site Reliability Engineer",
+      "level": "ICT5",
+      "location": "Cupertino, CA",
+      "base_salary": 195000,
+      "signing_bonus": 50000,
+      "annual_bonus_target_pct": 20,
       "equity": {
         "equity_type": "rsu",
-        "total_grant_value": 200000,
+        "total_grant_value": 100000,
         "vesting_years": 4,
         "cliff_months": 12
       },
       "benefits": {
         "healthcare_plan": "ppo",
-        "employer_401k_match_pct": 4,
+        "employer_401k_match_pct": 6,
         "pto_days": 20,
         "remote_policy": "hybrid"
       }
     },
-    "years_of_experience": 6
+    "years_of_experience": 15
   }'
 ```
 
@@ -164,12 +185,12 @@ curl -X POST http://localhost:8000/api/analyze \
 
 ```json
 {
-  "total_comp": { "base_salary": 165000, "equity_annualized": 50000, "total": 234800 },
-  "col_adjusted_base": 100000,
-  "market_benchmark": { "p50": 161840, "your_percentile": 54.0 },
-  "dimension_scores": { "salary": 54, "equity": 72, "benefits": 80, "company_health": 45, "work_life_balance": 70 },
-  "score": 64.0,
-  "summary": "Stripe — $165,000 base + $50,000 equity = $234,800 total comp/yr. ..."
+  "total_comp": { "base_salary": 195000, "equity_annualized": 25000, "total": 259000 },
+  "col_adjusted_base": 72222,
+  "market_benchmark": { "p50": 161840, "your_percentile": 82.0 },
+  "dimension_scores": { "salary": 82, "equity": 35, "benefits": 100, "company_health": 50, "work_life_balance": 90 },
+  "score": 66.4,
+  "summary": "Apple — $195,000 base + $25,000 equity = $259,000 total comp/yr. ..."
 }
 ```
 
@@ -179,8 +200,8 @@ curl -X POST http://localhost:8000/api/analyze \
 curl -X POST http://localhost:8000/api/compare \
   -H "Content-Type: application/json" \
   -d '{
-    "offer_a": { "company_name": "Stripe", "role": "Senior SWE", "location": "Seattle, WA", "base_salary": 165000 },
-    "offer_b": { "company_name": "Google", "role": "Senior SWE", "location": "Seattle, WA", "base_salary": 185000 }
+    "offer_a": { "company_name": "Apple", "role": "Senior SRE", "location": "Cupertino, CA", "base_salary": 195000 },
+    "offer_b": { "company_name": "Google", "role": "Senior SRE", "location": "Cupertino, CA", "base_salary": 210000 }
   }'
 ```
 
@@ -190,10 +211,10 @@ curl -X POST http://localhost:8000/api/compare \
 curl -X POST http://localhost:8000/api/negotiate \
   -H "Content-Type: application/json" \
   -d '{
-    "offer": { "company_name": "Stripe", "role": "Senior SWE", "location": "Seattle, WA", "base_salary": 165000 },
-    "competing_offer": { "company_name": "Google", "role": "Senior SWE", "location": "Seattle, WA", "base_salary": 185000 },
-    "target_salary": 180000,
-    "years_of_experience": 6
+    "offer": { "company_name": "Apple", "role": "Senior SRE", "location": "Cupertino, CA", "base_salary": 195000 },
+    "competing_offer": { "company_name": "Google", "role": "Senior SRE", "location": "Cupertino, CA", "base_salary": 210000 },
+    "target_salary": 215000,
+    "years_of_experience": 15
   }'
 ```
 
@@ -202,10 +223,10 @@ curl -X POST http://localhost:8000/api/negotiate \
 ## Demo endpoints (no payload needed)
 
 ```bash
-# Analyze a pre-built Stripe L5 offer
+# Analyze a pre-built Apple ICT5 SRE offer
 curl http://localhost:8000/demo/analyze | python3 -m json.tool
 
-# Compare Stripe vs Google L5
+# Compare Apple ICT5 vs Google L6 SRE
 curl http://localhost:8000/demo/compare | python3 -m json.tool
 ```
 
@@ -227,7 +248,7 @@ flake8 app tests --max-line-length=100
 ## Tech stack
 
 | Layer | Tech |
-|---|---|
+|:---|:---|
 | API | FastAPI 0.111 + Uvicorn |
 | AI | Anthropic Claude claude-sonnet-4-6 (prompt caching + tool use) |
 | Salary data | BLS OEWS API (free, no auth) |
@@ -263,7 +284,7 @@ offeriq/
 All config is read from `.env` at startup (via pydantic-settings). Copy `.env.example` to get started — no value is hardcoded in source.
 
 | Variable | Required | Description |
-|---|---|---|
+|:---|:---|:---|
 | `ANTHROPIC_API_KEY` | For `/api/negotiate` | Claude API key from [console.anthropic.com](https://console.anthropic.com) |
 | `APP_ENV` | No | `development` / `production` (default: `development`) |
 | `APP_PORT` | No | Port to bind (default: `8000`) |
@@ -293,4 +314,12 @@ OfferIQ differentiators:
 
 ## License
 
-MIT
+MIT — use freely, attribute appreciated.
+
+---
+
+## Author
+
+[Vinay Singh](https://vinay-singh-engineer.github.io)
+
+---
