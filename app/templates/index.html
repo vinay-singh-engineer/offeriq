@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OfferIQ — Job Offer Intelligence Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .bar-fill { transition: width 0.7s ease-out; }
+    .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+    .tab-inactive { color: #6b7280; }
+    .fade-in { animation: fadeIn 0.4s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900">
+
+<!-- Nav -->
+<nav class="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
+  <div class="max-w-5xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl font-bold text-indigo-600 tracking-tight">OfferIQ</span>
+      <span class="hidden sm:inline text-sm text-gray-400">Job Offer Intelligence</span>
+    </div>
+    <a href="/docs" target="_blank"
+       class="text-sm text-gray-500 hover:text-indigo-600 transition-colors">API Docs →</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="bg-white border-b border-gray-100 px-6 py-12 text-center">
+  <h1 class="text-4xl font-bold text-gray-900 mb-3">Evaluate Your Job Offer</h1>
+  <p class="text-lg text-gray-500 max-w-xl mx-auto">
+    Market benchmarks · Equity normalization · Company health · AI negotiation script
+  </p>
+</div>
+
+<!-- Main -->
+<main class="max-w-5xl mx-auto px-4 py-10">
+
+  <!-- Tabs -->
+  <div class="flex border-b border-gray-200 mb-8">
+    <button id="tab-analyze" onclick="showTab('analyze')"
+            class="tab-active px-6 py-3 text-sm transition-colors">Analyze Offer</button>
+    <button id="tab-compare" onclick="showTab('compare')"
+            class="tab-inactive px-6 py-3 text-sm transition-colors">Compare Two Offers</button>
+  </div>
+
+  <!-- ── ANALYZE FORM ── -->
+  <div id="panel-analyze">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <h2 class="text-lg font-semibold text-gray-800 mb-6">Offer Details</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {% include "partials/offer_fields.html" ignore missing %}
+        <!-- Inline fields since partials aren't available -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+          <input id="a-company" type="text" placeholder="e.g. Apple"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+          <input id="a-role" type="text" placeholder="e.g. Senior Site Reliability Engineer"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
+          <input id="a-level" type="text" placeholder="e.g. ICT5, Senior, L6"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+          <input id="a-location" type="text" placeholder="e.g. Cupertino, CA"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Base Salary (USD) *</label>
+          <input id="a-salary" type="number" placeholder="e.g. 195000"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Signing Bonus (USD)</label>
+          <input id="a-signing" type="number" placeholder="e.g. 50000"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Annual Bonus Target (%)</label>
+          <input id="a-bonus-pct" type="number" placeholder="e.g. 15"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+          <input id="a-yoe" type="number" placeholder="e.g. 15"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"/>
+        </div>
+      </div>
+
+      <!-- Equity -->
+      <div class="mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Equity</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Equity Type</label>
+            <select id="a-equity-type" onchange="toggleEquity('a')"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="none">None</option>
+              <option value="rsu">RSUs</option>
+              <option value="options">Stock Options</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Vesting Schedule</label>
+            <div class="flex gap-2">
+              <select id="a-vesting-years"
+                      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="4">4 years</option>
+                <option value="3">3 years</option>
+                <option value="2">2 years</option>
+              </select>
+              <select id="a-cliff-months"
+                      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="12">12-mo cliff</option>
+                <option value="0">No cliff</option>
+                <option value="6">6-mo cliff</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- RSU fields -->
+        <div id="a-rsu-fields" class="hidden mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Total RSU Grant Value (USD)</label>
+          <input id="a-rsu-grant" type="number" placeholder="e.g. 100000"
+                 class="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+        </div>
+        <!-- Options fields -->
+        <div id="a-options-fields" class="hidden mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Number of Shares</label>
+            <input id="a-opt-shares" type="number" placeholder="e.g. 10000"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Strike Price ($)</label>
+            <input id="a-opt-strike" type="number" step="0.01" placeholder="e.g. 12.50"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Current Stock Price ($)</label>
+            <input id="a-opt-price" type="number" step="0.01" placeholder="e.g. 25.00"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Benefits</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Healthcare</label>
+            <select id="a-healthcare"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="">Unknown</option>
+              <option value="ppo">PPO</option>
+              <option value="hmo">HMO</option>
+              <option value="hdhp">HDHP</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">401k Match (%)</label>
+            <input id="a-401k" type="number" step="0.5" placeholder="e.g. 4"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">PTO Days</label>
+            <input id="a-pto" type="number" placeholder="e.g. 20"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Remote Policy</label>
+            <select id="a-remote"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="">Unknown</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="onsite">On-site</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        <button onclick="submitAnalyze()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg text-sm transition-colors">
+          Analyze Offer →
+        </button>
+        <button onclick="loadDemo()"
+                class="border border-gray-300 hover:border-gray-400 text-gray-600 font-medium px-6 py-3 rounded-lg text-sm transition-colors">
+          Load Demo
+        </button>
+        <button onclick="resetForm()"
+                class="border border-gray-300 hover:border-red-300 hover:text-red-600 text-gray-400 font-medium px-6 py-3 rounded-lg text-sm transition-colors">
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COMPARE FORM ── -->
+  <div id="panel-compare" class="hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Offer A -->
+      <div class="bg-white rounded-xl shadow-sm border-2 border-indigo-200 p-6">
+        <h3 class="font-semibold text-indigo-700 mb-5">Offer A</h3>
+        <div class="space-y-4">
+          <input id="ca-company" type="text" placeholder="Company *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          <input id="ca-role" type="text" placeholder="Role *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          <input id="ca-location" type="text" placeholder="Location *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          <input id="ca-salary" type="number" placeholder="Base Salary (USD) *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          <input id="ca-rsu-grant" type="number" placeholder="RSU Grant Value (optional)"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+          <select id="ca-remote"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="">Remote Policy</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="onsite">On-site</option>
+          </select>
+        </div>
+      </div>
+      <!-- Offer B -->
+      <div class="bg-white rounded-xl shadow-sm border-2 border-purple-200 p-6">
+        <h3 class="font-semibold text-purple-700 mb-5">Offer B</h3>
+        <div class="space-y-4">
+          <input id="cb-company" type="text" placeholder="Company *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"/>
+          <input id="cb-role" type="text" placeholder="Role *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"/>
+          <input id="cb-location" type="text" placeholder="Location *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"/>
+          <input id="cb-salary" type="number" placeholder="Base Salary (USD) *"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"/>
+          <input id="cb-rsu-grant" type="number" placeholder="RSU Grant Value (optional)"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"/>
+          <select id="cb-remote"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+            <option value="">Remote Policy</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="onsite">On-site</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="submitCompare()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg text-sm transition-colors">
+        Compare Offers →
+      </button>
+      <button onclick="resetForm()"
+              class="border border-gray-300 hover:border-red-300 hover:text-red-600 text-gray-400 font-medium px-6 py-3 rounded-lg text-sm transition-colors">
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="hidden text-center py-16">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+    <p class="text-gray-500 mt-4 text-sm">Analyzing your offer...</p>
+  </div>
+
+  <!-- Error -->
+  <div id="error-box" class="hidden mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+    <p class="text-red-700 text-sm" id="error-msg"></p>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="hidden mt-10 fade-in"></div>
+
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-gray-100 mt-20 py-8 text-center text-sm text-gray-400">
+  OfferIQ v{{ version }} — Built with FastAPI + Claude API ·
+  <a href="/docs" class="hover:text-indigo-600 transition-colors">API Docs</a>
+</footer>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let _lastAnalysis = null;
+let _lastOffer = null;
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function showTab(tab) {
+  ['analyze','compare'].forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById(`tab-${t}`);
+    btn.className = t === tab
+      ? 'tab-active px-6 py-3 text-sm transition-colors'
+      : 'tab-inactive px-6 py-3 text-sm transition-colors';
+  });
+  hide('results'); hide('error-box');
+}
+
+// ── Equity toggle ─────────────────────────────────────────────────────────
+function toggleEquity(prefix) {
+  const type = val(`${prefix}-equity-type`);
+  document.getElementById(`${prefix}-rsu-fields`)
+    .classList.toggle('hidden', type !== 'rsu');
+  document.getElementById(`${prefix}-options-fields`)
+    .classList.toggle('hidden', type !== 'options');
+}
+
+// ── Form helpers ──────────────────────────────────────────────────────────
+const val = id => (document.getElementById(id) || {}).value || '';
+const num = id => parseFloat(val(id)) || null;
+const int = id => parseInt(val(id)) || null;
+
+function buildOffer(p) {
+  const eType = val(`${p}-equity-type`) || 'none';
+  let equity = null;
+  if (eType === 'rsu' && num(`${p}-rsu-grant`)) {
+    equity = {
+      equity_type: 'rsu',
+      total_grant_value: num(`${p}-rsu-grant`),
+      vesting_years: int(`${p}-vesting-years`) || 4,
+      cliff_months: int(`${p}-cliff-months`) ?? 12,
+    };
+  } else if (eType === 'options') {
+    equity = {
+      equity_type: 'options',
+      num_shares: int(`${p}-opt-shares`),
+      strike_price: num(`${p}-opt-strike`),
+      current_stock_price: num(`${p}-opt-price`),
+      vesting_years: int(`${p}-vesting-years`) || 4,
+      cliff_months: int(`${p}-cliff-months`) ?? 12,
+    };
+  }
+  const benefits = {
+    healthcare_plan: val(`${p}-healthcare`) || null,
+    employer_401k_match_pct: num(`${p}-401k`),
+    pto_days: int(`${p}-pto`),
+    remote_policy: val(`${p}-remote`) || null,
+  };
+  return {
+    company_name: val(`${p}-company`),
+    role: val(`${p}-role`),
+    level: val(`${p}-level`) || null,
+    location: val(`${p}-location`),
+    base_salary: num(`${p}-salary`),
+    signing_bonus: num(`${p}-signing`),
+    annual_bonus_target_pct: num(`${p}-bonus-pct`),
+    equity,
+    benefits,
+  };
+}
+
+function buildCompareOffer(p) {
+  const grant = num(`${p}-rsu-grant`);
+  return {
+    company_name: val(`${p}-company`),
+    role: val(`${p}-role`) || 'Software Engineer',
+    location: val(`${p}-location`),
+    base_salary: num(`${p}-salary`),
+    equity: grant ? { equity_type: 'rsu', total_grant_value: grant, vesting_years: 4, cliff_months: 12 } : null,
+    benefits: { remote_policy: val(`${p}-remote`) || null },
+  };
+}
+
+// ── API calls ─────────────────────────────────────────────────────────────
+async function api(endpoint, body) {
+  show('loading'); hide('results'); hide('error-box');
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || res.statusText);
+    }
+    return await res.json();
+  } finally {
+    hide('loading');
+  }
+}
+
+async function submitAnalyze() {
+  const offer = buildOffer('a');
+  if (!offer.company_name || !offer.base_salary || !offer.location || !offer.role) {
+    showError('Please fill in Company, Role, Location, and Base Salary.'); return;
+  }
+  try {
+    const data = await api('/api/analyze', {
+      offer,
+      years_of_experience: int('a-yoe'),
+    });
+    _lastAnalysis = data;
+    _lastOffer = offer;
+    renderAnalysis(data);
+  } catch(e) { showError(e.message); }
+}
+
+async function submitCompare() {
+  const offerA = buildCompareOffer('ca');
+  const offerB = buildCompareOffer('cb');
+  if (!offerA.company_name || !offerA.base_salary || !offerB.company_name || !offerB.base_salary) {
+    showError('Please fill in company name and base salary for both offers.'); return;
+  }
+  try {
+    const data = await api('/api/compare', { offer_a: offerA, offer_b: offerB });
+    renderComparison(data);
+  } catch(e) { showError(e.message); }
+}
+
+async function submitNegotiate() {
+  if (!_lastOffer) return;
+  const competing = val('neg-comp-company') ? {
+    company_name: val('neg-comp-company'),
+    role: _lastOffer.role,
+    location: _lastOffer.location,
+    base_salary: num('neg-comp-salary') || _lastOffer.base_salary,
+  } : null;
+
+  show('neg-loading');
+  document.getElementById('neg-result').classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/negotiate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        offer: _lastOffer,
+        years_of_experience: int('neg-yoe'),
+        competing_offer: competing,
+        target_salary: num('neg-target'),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+    renderNegotiation(data);
+  } catch(e) {
+    document.getElementById('neg-result').innerHTML =
+      `<p class="text-red-600 text-sm">${e.message}</p>`;
+    document.getElementById('neg-result').classList.remove('hidden');
+  } finally {
+    hide('neg-loading');
+  }
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────
+function scoreColor(s) {
+  if (s >= 75) return 'text-green-600';
+  if (s >= 50) return 'text-yellow-600';
+  return 'text-red-500';
+}
+function scoreBg(s) {
+  if (s >= 75) return 'bg-green-50 border-green-200';
+  if (s >= 50) return 'bg-yellow-50 border-yellow-200';
+  return 'bg-red-50 border-red-200';
+}
+function barColor(s) {
+  if (s >= 75) return 'bg-green-500';
+  if (s >= 50) return 'bg-yellow-500';
+  return 'bg-red-500';
+}
+function riskBadge(risk) {
+  const map = {
+    low: 'bg-green-100 text-green-700',
+    medium: 'bg-yellow-100 text-yellow-700',
+    high: 'bg-red-100 text-red-700',
+    unknown: 'bg-gray-100 text-gray-600',
+  };
+  return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${map[risk] || map.unknown}">${risk}</span>`;
+}
+function fmt(n) { return n ? `$${Math.round(n).toLocaleString()}` : '—'; }
+function pctBar(label, value) {
+  return `
+    <div class="mb-3">
+      <div class="flex justify-between text-sm mb-1">
+        <span class="text-gray-600">${label}</span>
+        <span class="font-medium ${scoreColor(value)}">${value.toFixed(0)}/100</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2">
+        <div class="bar-fill h-2 rounded-full ${barColor(value)}" style="width:${value}%"></div>
+      </div>
+    </div>`;
+}
+
+function analysisCard(data) {
+  const o = data.offer, tc = data.total_comp, bm = data.market_benchmark;
+  const ch = data.company_health, ds = data.dimension_scores;
+  const pct = bm && bm.your_percentile != null
+    ? `<span class="font-semibold">${bm.your_percentile.toFixed(0)}th percentile</span> for ${o.role} in ${o.location}`
+    : 'Benchmark unavailable';
+  const col = data.col_adjusted_base
+    ? `<p class="text-sm text-gray-500 mt-1">Purchasing power: <span class="font-medium">${fmt(data.col_adjusted_base)}</span> (national avg equivalent)</p>`
+    : '';
+
+  return `
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">${o.company_name}</h3>
+          <p class="text-gray-500 text-sm mt-0.5">${o.role}${o.level ? ` · ${o.level}` : ''} · ${o.location}</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold ${scoreColor(data.score)}">${data.score.toFixed(0)}</div>
+          <div class="text-xs text-gray-400 mt-0.5">out of 100</div>
+        </div>
+      </div>
+
+      <!-- Total Comp -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Total Compensation</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div><p class="text-xs text-gray-500">Base</p><p class="font-semibold text-gray-900">${fmt(tc.base_salary)}</p></div>
+          <div><p class="text-xs text-gray-500">Equity/yr</p><p class="font-semibold text-gray-900">${fmt(tc.equity_annualized)}</p></div>
+          <div><p class="text-xs text-gray-500">Bonus/yr</p><p class="font-semibold text-gray-900">${fmt(tc.annual_bonus)}</p></div>
+          <div class="border-l border-gray-200 pl-3"><p class="text-xs text-gray-500">Total/yr</p><p class="font-bold text-indigo-600 text-lg">${fmt(tc.total)}</p></div>
+        </div>
+        ${col}
+      </div>
+
+      <!-- Market Benchmark -->
+      ${bm ? `
+      <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-5">
+        <p class="text-xs font-semibold text-indigo-400 uppercase tracking-wide mb-2">Market Benchmark</p>
+        <p class="text-sm text-gray-700">${pct}</p>
+        <div class="flex gap-4 mt-2 text-sm">
+          <span class="text-gray-500">p25 <span class="font-medium text-gray-700">${fmt(bm.p25)}</span></span>
+          <span class="text-gray-500">median <span class="font-medium text-gray-700">${fmt(bm.p50)}</span></span>
+          <span class="text-gray-500">p75 <span class="font-medium text-gray-700">${fmt(bm.p75)}</span></span>
+        </div>
+      </div>` : ''}
+
+      <!-- Dimension Scores -->
+      <div class="mb-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Score Breakdown</p>
+        ${pctBar('Salary', ds.salary)}
+        ${pctBar('Equity', ds.equity)}
+        ${pctBar('Benefits', ds.benefits)}
+        ${pctBar('Company Health', ds.company_health)}
+        ${pctBar('Work-Life Balance', ds.work_life_balance)}
+      </div>
+
+      <!-- Company Health -->
+      ${ch ? `
+      <div class="border-t border-gray-100 pt-4">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Company Health</p>
+        <div class="flex items-center gap-2">
+          ${riskBadge(ch.layoff_risk)}
+          <span class="text-sm text-gray-600">${ch.notes || ''}</span>
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderAnalysis(data) {
+  const html = `
+    ${analysisCard(data)}
+    <!-- Negotiate -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-1">Get Negotiation Script</h3>
+      <p class="text-sm text-gray-500 mb-5">Claude will write a personalized email and talking points using your specific offer data.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Competing Offer Company</label>
+          <input id="neg-comp-company" type="text" placeholder="e.g. Apple (optional)"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Competing Offer Salary</label>
+          <input id="neg-comp-salary" type="number" placeholder="e.g. 210000"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Your Target Salary</label>
+          <input id="neg-target" type="number" placeholder="e.g. 215000"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+          <input id="neg-yoe" type="number" placeholder="e.g. 15"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"/>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="submitNegotiate()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors">
+          Generate Script →
+        </button>
+        <button onclick="loadNegotiateDemo()"
+                class="border border-gray-300 hover:border-gray-400 text-gray-600 font-medium px-6 py-2.5 rounded-lg text-sm transition-colors">
+          Load Demo
+        </button>
+      </div>
+      <div id="neg-loading" class="hidden mt-4 flex items-center gap-2 text-sm text-gray-500">
+        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+        Generating negotiation script...
+      </div>
+      <div id="neg-result" class="hidden mt-6"></div>
+    </div>`;
+  document.getElementById('results').innerHTML = html;
+  show('results');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderComparison(data) {
+  const rec = data.recommendation;
+  const winner = rec === 'offer_a' ? data.offer_a.offer.company_name
+               : rec === 'offer_b' ? data.offer_b.offer.company_name : null;
+  const badgeHtml = winner
+    ? `<div class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg inline-block mb-4">Recommendation: ${winner}</div>`
+    : `<div class="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg inline-block mb-4">Comparable Offers</div>`;
+
+  const html = `
+    ${badgeHtml}
+    <p class="text-gray-600 text-sm mb-8">${data.recommendation_reason}</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="${rec === 'offer_a' ? 'ring-2 ring-green-400' : ''} rounded-xl">${analysisCard(data.offer_a)}</div>
+      <div class="${rec === 'offer_b' ? 'ring-2 ring-green-400' : ''} rounded-xl">${analysisCard(data.offer_b)}</div>
+    </div>`;
+  document.getElementById('results').innerHTML = html;
+  show('results');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderNegotiation(data) {
+  const tpHtml = data.talking_points.map(p =>
+    `<li class="flex gap-2 text-sm text-gray-700"><span class="text-indigo-400 mt-0.5">▸</span>${p}</li>`
+  ).join('');
+
+  document.getElementById('neg-result').innerHTML = `
+    <div class="space-y-5">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-green-50 border border-green-100 rounded-lg p-3 text-center">
+          <p class="text-xs text-green-600 font-medium">Floor</p>
+          <p class="text-lg font-bold text-green-700">${fmt(data.floor)}</p>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-center">
+          <p class="text-xs text-indigo-600 font-medium">Recommended Ask</p>
+          <p class="text-lg font-bold text-indigo-700">${fmt(data.recommended_counter)}</p>
+        </div>
+        <div class="bg-purple-50 border border-purple-100 rounded-lg p-3 text-center">
+          <p class="text-xs text-purple-600 font-medium">Stretch Goal</p>
+          <p class="text-lg font-bold text-purple-700">${fmt(data.stretch_goal)}</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Your Leverage</p>
+        <p class="text-sm text-gray-700 bg-gray-50 rounded-lg p-3">${data.leverage_notes}</p>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Negotiation Email</p>
+        <p class="text-sm text-gray-500 mb-1">Subject: ${data.email_subject}</p>
+        <pre class="text-sm text-gray-700 bg-gray-50 rounded-lg p-4 whitespace-pre-wrap font-sans leading-relaxed">${data.email_body}</pre>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Talking Points</p>
+        <ul class="space-y-2">${tpHtml}</ul>
+      </div>
+    </div>`;
+  document.getElementById('neg-result').classList.remove('hidden');
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────
+function resetForm() {
+  // Clear all text/number inputs
+  document.querySelectorAll('input[type="text"], input[type="number"]')
+    .forEach(el => { el.value = ''; });
+
+  // Reset all selects to first option
+  document.querySelectorAll('select')
+    .forEach(el => { el.selectedIndex = 0; });
+
+  // Hide conditional equity fields
+  ['a-rsu-fields', 'a-options-fields'].forEach(id => {
+    document.getElementById(id)?.classList.add('hidden');
+  });
+
+  // Clear results, errors, state
+  hide('results'); hide('error-box'); hide('loading');
+  _lastAnalysis = null;
+  _lastOffer = null;
+}
+
+// ── Demo loader ────────────────────────────────────────────────────────────
+function loadDemo() {
+  document.getElementById('a-company').value = 'Apple';
+  document.getElementById('a-role').value = 'Senior Site Reliability Engineer';
+  document.getElementById('a-level').value = 'ICT5';
+  document.getElementById('a-location').value = 'Cupertino, CA';
+  document.getElementById('a-salary').value = '195000';
+  document.getElementById('a-signing').value = '50000';
+  document.getElementById('a-bonus-pct').value = '20';
+  document.getElementById('a-yoe').value = '15';
+  document.getElementById('a-equity-type').value = 'rsu';
+  toggleEquity('a');
+  document.getElementById('a-rsu-grant').value = '100000';
+  document.getElementById('a-vesting-years').value = '4';
+  document.getElementById('a-cliff-months').value = '12';
+  document.getElementById('a-healthcare').value = 'ppo';
+  document.getElementById('a-401k').value = '6';
+  document.getElementById('a-pto').value = '20';
+  document.getElementById('a-remote').value = 'hybrid';
+}
+
+function loadNegotiateDemo() {
+  document.getElementById('neg-comp-company').value = 'Apple';
+  document.getElementById('neg-comp-salary').value = '210000';
+  document.getElementById('neg-target').value = '215000';
+  document.getElementById('neg-yoe').value = '15';
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function show(id) { document.getElementById(id)?.classList.remove('hidden'); }
+function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
+function showError(msg) {
+  document.getElementById('error-msg').textContent = msg;
+  show('error-box');
+  document.getElementById('error-box').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

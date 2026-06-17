@@ -1,0 +1,27 @@
+{
+  "status": "REQUEST_SUCCEEDED",
+  "responseTime": 142,
+  "message": [],
+  "Results": {
+    "series": [
+      {
+        "seriesID": "OEU004266015125212",
+        "data": [
+          {"year": "2023", "period": "A01", "periodName": "Annual", "value": "133690", "footnotes": [{}]}
+        ]
+      },
+      {
+        "seriesID": "OEU004266015125213",
+        "data": [
+          {"year": "2023", "period": "A01", "periodName": "Annual", "value": "161840", "footnotes": [{}]}
+        ]
+      },
+      {
+        "seriesID": "OEU004266015125214",
+        "data": [
+          {"year": "2023", "period": "A01", "periodName": "Annual", "value": "208000", "footnotes": [{}]}
+        ]
+      }
+    ]
+  }
+}

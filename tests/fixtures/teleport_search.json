@@ -1,0 +1,18 @@
+{
+  "_embedded": {
+    "city:search-results": [
+      {
+        "matching_full_name": "Seattle, Washington, United States",
+        "_links": {
+          "city:item": {
+            "href": "https://api.teleport.org/api/cities/geonameid:5809844/"
+          },
+          "city:urban_area": {
+            "href": "https://api.teleport.org/api/urban_areas/slug:seattle/",
+            "name": "Seattle"
+          }
+        }
+      }
+    ]
+  }
+}
