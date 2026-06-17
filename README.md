@@ -245,6 +245,23 @@ flake8 app tests --max-line-length=100
 
 ---
 
+## CI / GitHub Actions
+
+CI runs automatically on every push — but only when relevant files change.
+
+| Event | Branches | Triggers when |
+|:---|:---|:---|
+| Push | `main`, `development` | Files under `app/` or `.github/workflows/ci.yml` changed |
+| Pull Request | `main` | Files under `app/` changed |
+
+This means pushes that only touch `README.md`, `tests/`, or templates do **not** trigger a CI run.
+
+Each run executes two steps:
+1. `flake8 app tests --max-line-length=100` — lint
+2. `pytest tests/ -v` — 135 tests
+
+---
+
 ## Tech stack
 
 | Layer | Tech |
