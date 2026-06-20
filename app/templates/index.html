@@ -287,8 +287,7 @@
 
 <!-- Footer -->
 <footer class="border-t border-gray-100 mt-20 py-8 text-center text-sm text-gray-400">
-  OfferIQ © 2026 Vinay Singh · v{{ version }} ·
-  <a href="/docs" class="hover:text-indigo-600 transition-colors">API Docs</a>
+  OfferIQ © 2026 Vinay Singh · v{{ version }}
 </footer>
 
 <script>
@@ -497,7 +496,7 @@ function pctBar(label, value) {
     </div>`;
 }
 
-function analysisCard(data) {
+function analysisCard(data, highlighted = false) {
   const o = data.offer, tc = data.total_comp, bm = data.market_benchmark;
   const ch = data.company_health, ds = data.dimension_scores;
   const pct = bm && bm.your_percentile != null
@@ -508,7 +507,7 @@ function analysisCard(data) {
     : '';
 
   return `
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6${highlighted ? ' ring-2 ring-green-400' : ' mb-6'}">
       <!-- Header -->
       <div class="flex items-start justify-between mb-6">
         <div>
@@ -629,8 +628,8 @@ function renderComparison(data) {
     ${badgeHtml}
     <p class="text-gray-600 text-sm mb-8">${data.recommendation_reason}</p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="${rec === 'offer_a' ? 'ring-2 ring-green-400' : ''} rounded-xl">${analysisCard(data.offer_a)}</div>
-      <div class="${rec === 'offer_b' ? 'ring-2 ring-green-400' : ''} rounded-xl">${analysisCard(data.offer_b)}</div>
+      ${analysisCard(data.offer_a, rec === 'offer_a')}
+      ${analysisCard(data.offer_b, rec === 'offer_b')}
     </div>`;
   document.getElementById('results').innerHTML = html;
   show('results');
@@ -704,7 +703,7 @@ function loadDemo() {
   document.getElementById('a-location').value = 'Cupertino, CA';
   document.getElementById('a-salary').value = '195000';
   document.getElementById('a-signing').value = '50000';
-  document.getElementById('a-bonus-pct').value = '20';
+  document.getElementById('a-bonus-pct').value = '15';
   document.getElementById('a-yoe').value = '15';
   document.getElementById('a-equity-type').value = 'rsu';
   toggleEquity('a');
