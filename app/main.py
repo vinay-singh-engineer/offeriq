@@ -1,11 +1,13 @@
 import asyncio
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from app.routes import health, offer, web, demo
 
 SHUTDOWN_DRAIN_TIMEOUT = 30.0
 _in_flight_requests = 0
+_VERSION = (Path(__file__).parents[1] / "VERSION").read_text().strip()
 
 
 @asynccontextmanager
@@ -19,7 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="OfferIQ",
     description="Job Offer Intelligence Platform — evaluate, compare, and negotiate offers",
-    version="0.1.0",
+    version=_VERSION,
     lifespan=lifespan,
 )
 
