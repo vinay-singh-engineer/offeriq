@@ -93,7 +93,7 @@ cd offeriq
 
 python3.9 -m venv .venv --system-site-packages
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 
 cp .env.example .env
 ```
